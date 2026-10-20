@@ -1,0 +1,15 @@
+{% extends "base_app.html" %}
+{% block title %}{{ artista.nombre_visible }}{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Artista{% if artista.insignia_verificado %} destacada{% endif %}</span>
+  <h1 class="display-title">{{ artista.nombre_visible }}</h1>
+  {% if artista.insignia_verificado %}<p style="margin:.6rem 0 0"><span class="badge-verificado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Artista verificado</span></p>{% endif %}</div></div>
+<div class="stat-grid">
+  <div class="stat"><span>Obras publicadas</span><strong>{{ n_obras }}</strong></div>
+  <div class="stat"><span>Obras vendidas</span><strong>{{ n_vendidas }}</strong></div>
+</div>
+<h2 class="block-title">Su colección en subasta</h2>
+{% if subastas %}<div class="masonry">{% for s in subastas %}{% include "partials/_tarjeta_subasta.html" %}{% endfor %}</div>
+{% else %}<div class="empty">Esta artista no tiene obras en subasta ahora mismo.</div>{% endif %}
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/subastas.js' %}"></script>{% endblock %}

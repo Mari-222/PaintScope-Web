@@ -1,0 +1,19 @@
+{% extends "base_app.html" %}
+{% block title %}Confirmar acción{% endblock %}
+{% block page_class %} page--narrow{% endblock %}
+{% block content %}
+<span class="eyebrow">Confirmación adicional</span>
+<h1 class="display-title">¿{% if accion == 'eliminar' %}Eliminar{% else %}Suspender{% endif %} a {{ u.nombre_visible }}?</h1>
+<div class="panel-card" style="margin-top:1.4rem">
+  <p>{{ u.email }} · {{ u.get_rol_display }}</p>
+  {% if accion == 'eliminar' and not activa %}
+    <p class="muted">Esta cuenta no tiene subastas ni postulaciones en curso. La eliminación no se puede deshacer.</p>
+  {% else %}
+    <div class="notice">Este usuario tiene actividad en curso (subastas, postulaciones o pujas activas). Confirma que quieres continuar.</div>
+  {% endif %}
+  <form method="post" action="{% if accion == 'eliminar' %}{% url 'panel:usuario_eliminar' u.pk %}{% else %}{% url 'panel:usuario_suspender' u.pk %}{% endif %}">{% csrf_token %}
+    <input type="hidden" name="confirmar" value="1">
+    <div class="form-actions"><button class="button button--danger" type="submit">Sí, {{ accion }}</button><a class="button button--ghost" href="{% url 'panel:usuarios' %}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

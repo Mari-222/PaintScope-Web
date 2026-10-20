@@ -1,0 +1,9 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sin acceso · PaintScope</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/paintscope.css' %}"></head>
+<body><div class="app-shell"><main style="max-width:34rem;margin:12vh auto"><div class="page" style="min-height:auto;text-align:center">
+<p class="display-title">Esta sección no es para tu rol</p>
+<p class="subtitle" style="margin:1rem auto 1.6rem">Tu cuenta no tiene permisos para ver esta página. Vuelve a tu panel para seguir.</p>
+<a class="button" href="{% url 'inicio' %}">Ir a mi panel</a></div></main></div></body></html>

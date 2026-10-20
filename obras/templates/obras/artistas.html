@@ -1,0 +1,12 @@
+{% extends "base_app.html" %}
+{% block title %}Artistas{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Comunidad</span><h1 class="display-title">Artistas</h1></div></div>
+{% for a in artistas %}
+  <div class="work-row" style="grid-template-columns:3.2rem 1fr auto">
+    <span class="avatar" aria-hidden="true">{{ a.nombre_visible|slice:":1" }}</span>
+    <div><strong>{{ a.nombre_visible }}{% if a.insignia_verificado %} <span class="badge-verificado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Verificado</span>{% endif %}</strong><span class="muted small">{{ a.n_obras }} obra{{ a.n_obras|pluralize }} publicada{{ a.n_obras|pluralize }}</span></div>
+    <a class="button button--small button--ghost" href="{% url 'obras:perfil_artista' a.pk %}">Ver perfil</a>
+  </div>
+{% empty %}<div class="empty"><strong>Aún no hay artistas</strong>Los artistas aparecerán aquí al registrarse.</div>{% endfor %}
+{% endblock %}

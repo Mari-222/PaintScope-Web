@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: paintscope
+      MYSQL_USER: paintscope
+      MYSQL_PASSWORD: paintscope_dev
+      MYSQL_ROOT_PASSWORD: root_dev
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+volumes:
+  mysqldata:

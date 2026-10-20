@@ -1,0 +1,17 @@
+{% extends "base_app.html" %}
+{% block title %}Eventos temáticos{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Curaduría</span><h1 class="display-title">Eventos temáticos</h1>
+  <p class="subtitle">Agrupa las subastas por temporada o categoría: Artistas Locales, Arte Barroco, Semana Santa, Black Friday…</p></div>
+  <a class="button" href="{% url 'obras:evento_nuevo' %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-plus"/></svg> Crear evento</a></div>
+{% for e in eventos %}
+  <div class="work-row" style="grid-template-columns:1fr auto auto">
+    <div><strong><a href="{% url 'obras:evento_detalle' e.pk %}" style="text-decoration:none">{{ e.nombre }}</a></strong>
+      <span class="muted small">{{ e.tematica }} · {{ e.temporada }} · {{ e.fecha_inicio|date:"d/m" }} al {{ e.fecha_fin|date:"d/m/Y" }} · {{ e.n_subastas }} subasta{{ e.n_subastas|pluralize }}</span></div>
+    <span class="status {% if e.publicado %}status--ok{% else %}status--wait{% endif %}">{% if e.publicado %}Publicado{% else %}Borrador{% endif %}</span>
+    <a class="button button--small button--ghost" href="{% url 'obras:evento_detalle' e.pk %}">Abrir</a>
+  </div>
+{% empty %}
+  <div class="empty"><strong>Aún no hay eventos</strong>Crea el primero y publícalo para abrir la convocatoria a los artistas.</div>
+{% endfor %}
+{% endblock %}

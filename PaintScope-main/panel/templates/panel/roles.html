@@ -1,0 +1,11 @@
+{% extends "base_app.html" %}
+{% block title %}Roles y permisos{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Control de acceso</span><h1 class="display-title">Roles y permisos</h1>
+  <p class="subtitle">Todos los roles están operativos. Para cambiar el rol de una persona usa la pantalla de usuarios.</p></div>
+  <a class="button" href="{% url 'panel:usuarios' %}">Ir a usuarios</a></div>
+<div class="table-wrap"><table class="data matrix">
+  <thead><tr><th>Permiso</th>{% for valor, nombre, n in columnas %}<th>{{ nombre }}<br><span class="muted small">{{ n }} usuario{{ n|pluralize }}</span></th>{% endfor %}</tr></thead>
+  <tbody>{% for texto, marcas in filas %}<tr><td>{{ texto }}</td>{% for m in marcas %}<td>{% if m %}<span class="yes" aria-label="Sí">✓</span>{% else %}<span class="no" aria-label="No">—</span>{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

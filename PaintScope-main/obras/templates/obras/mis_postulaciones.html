@@ -1,0 +1,17 @@
+{% extends "base_app.html" %}
+{% block title %}Mis postulaciones{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Seguimiento</span><h1 class="display-title">Mis postulaciones</h1></div>
+  <a class="button button--ghost" href="{% url 'obras:portafolio' %}">Ir a mi portafolio</a></div>
+{% for p in postulaciones %}
+  <div class="work-row">
+    {% if p.obra.imagen_src %}<img src="{{ p.obra.imagen_src }}" alt="">{% else %}<div class="thumb"></div>{% endif %}
+    <div><strong>{{ p.obra.titulo }}</strong><span class="muted small">{{ p.evento.nombre }} · enviada {{ p.creada|date:"d/m/Y" }}</span>
+      {% if p.estado == 'rechazada' %}<p class="small" style="margin:.3rem 0 0;color:#8d3a22">Motivo: {{ p.motivo }}</p>{% endif %}
+      {% if p.estado == 'aprobada' %}<p class="small" style="margin:.3rem 0 0">Precio base: ${{ p.obra.precio_base|floatformat:0 }}</p>{% endif %}</div>
+    <span class="status {% if p.estado == 'aprobada' %}status--ok{% elif p.estado == 'rechazada' %}status--bad{% else %}status--wait{% endif %}">{{ p.get_estado_display }}</span>
+  </div>
+{% empty %}
+  <div class="empty"><strong>Aún no has postulado obras</strong>Postula un borrador de tu portafolio a un evento abierto.<p><a class="button" href="{% url 'obras:portafolio' %}">Ver mi portafolio</a></p></div>
+{% endfor %}
+{% endblock %}

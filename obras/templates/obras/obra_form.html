@@ -1,0 +1,34 @@
+{% extends "base_app.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_class %} page--narrow{% endblock %}
+{% block content %}
+<span class="eyebrow">Nueva obra en tu portafolio</span>
+<h1 class="display-title">{{ titulo }}</h1>
+<p class="subtitle">Se guardará como borrador. Cuando esté lista, la postulas a un evento.</p>
+<form method="post" enctype="multipart/form-data" class="panel-card" style="margin-top:1.4rem">{% csrf_token %}
+  {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+  <div class="form-grid">
+    <div class="field field--full"><label for="{{ form.imagen.id_for_label }}">Imagen de la obra</label>
+      <label class="image-upload" for="{{ form.imagen.id_for_label }}">
+        <img id="vista-previa" alt="Vista previa de la obra" {% if obra.imagen_src %}src="{{ obra.imagen_src }}"{% else %}hidden{% endif %}>
+        <strong>Sube una imagen de la obra</strong><small class="muted">JPG o PNG · Máximo 10 MB</small>
+      </label>
+      <input class="sr-only" type="file" name="imagen" id="{{ form.imagen.id_for_label }}" accept="image/jpeg,image/png,image/webp">
+      {{ form.imagen.errors }}</div>
+    <div class="field field--full"><label for="{{ form.titulo.id_for_label }}">Título de la obra</label>{{ form.titulo }}{{ form.titulo.errors }}</div>
+    <div class="field"><label for="{{ form.tecnica.id_for_label }}">Técnica</label>{{ form.tecnica }}{{ form.tecnica.errors }}</div>
+    <div class="field"><label for="{{ form.categoria.id_for_label }}">Categoría</label>{{ form.categoria }}{{ form.categoria.errors }}</div>
+    <div class="field"><label for="{{ form.dimensiones.id_for_label }}">Medidas</label>{{ form.dimensiones }}{{ form.dimensiones.errors }}</div>
+    <div class="field"><label for="{{ form.anio.id_for_label }}">Año</label>{{ form.anio }}{{ form.anio.errors }}</div>
+    <div class="field field--full"><label for="{{ form.descripcion.id_for_label }}">Descripción</label>{{ form.descripcion }}{{ form.descripcion.errors }}</div>
+  </div>
+  <div class="form-actions"><button class="button" type="submit">Guardar obra</button><a class="button button--ghost" href="{% url 'obras:portafolio' %}">Cancelar</a></div>
+</form>
+<script>
+  var entrada = document.querySelector('input[type=file][name=imagen]');
+  entrada.addEventListener('change', function () {
+    var f = entrada.files[0], img = document.getElementById('vista-previa');
+    if (f) { img.src = URL.createObjectURL(f); img.hidden = false; }
+  });
+</script>
+{% endblock %}

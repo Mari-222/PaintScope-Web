@@ -1,0 +1,20 @@
+{% extends "base_app.html" %}
+{% block title %}Postulaciones{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Panel de revisión</span><h1 class="display-title">Postulaciones por evaluar</h1></div></div>
+<nav class="tabs" aria-label="Estado de postulaciones">
+  <a href="?estado=pendiente" class="{% if estado == 'pendiente' %}is-active{% endif %}">Pendientes <span>{{ conteos.pendiente|default:0 }}</span></a>
+  <a href="?estado=aprobada" class="{% if estado == 'aprobada' %}is-active{% endif %}">Aprobadas <span>{{ conteos.aprobada|default:0 }}</span></a>
+  <a href="?estado=rechazada" class="{% if estado == 'rechazada' %}is-active{% endif %}">Rechazadas <span>{{ conteos.rechazada|default:0 }}</span></a>
+</nav>
+{% for p in items %}
+  <div class="work-row">
+    {% if p.obra.imagen_src %}<img src="{{ p.obra.imagen_src }}" alt="">{% else %}<div class="thumb"></div>{% endif %}
+    <div><strong>{{ p.obra.titulo }}</strong><span class="muted small">{{ p.obra.artista.nombre_visible }} · {{ p.obra.tecnica }} → {{ p.evento.nombre }}</span></div>
+    {% if p.estado == 'pendiente' %}<a class="button button--small" href="{% url 'obras:evaluar' p.pk %}">Evaluar</a>
+    {% else %}<span class="status {% if p.estado == 'aprobada' %}status--ok{% else %}status--bad{% endif %}">{{ p.get_estado_display }}</span>{% endif %}
+  </div>
+{% empty %}
+  <div class="empty"><strong>No hay postulaciones {{ estado }}s</strong>Cuando un artista postule una obra, aparecerá aquí.</div>
+{% endfor %}
+{% endblock %}

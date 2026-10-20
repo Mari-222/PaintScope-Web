@@ -1,0 +1,18 @@
+{% extends "base_app.html" %}
+{% block title %}Mis visitas{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Tu agenda</span><h1 class="display-title">Mis visitas</h1></div>
+  <a class="button" href="{% url 'subastas:explorar' %}">Elegir una obra</a></div>
+{% for v in visitas %}
+  <div class="work-row">
+    {% if v.obra.imagen_src %}<img src="{{ v.obra.imagen_src }}" alt="">{% else %}<div class="thumb"></div>{% endif %}
+    <div><strong>{{ v.obra.titulo }}</strong><span class="muted small">{{ v.get_tipo_display }} · {{ v.fecha_hora|date:"l j \d\e F, H:i" }}</span></div>
+    <div class="row">
+      {% if v.estado == 'cancelada' %}<span class="status status--bad">Cancelada</span>
+      {% elif v.fecha_hora < ahora %}<span class="status">Realizada</span>
+      {% else %}<span class="status status--ok">Agendada</span>
+        <form method="post" action="{% url 'visitas:cancelar' v.pk %}" onsubmit="return confirm('¿Cancelar esta visita?')">{% csrf_token %}<button class="button button--small button--ghost" type="submit">Cancelar</button></form>{% endif %}
+    </div>
+  </div>
+{% empty %}<div class="empty"><strong>Aún no has agendado visitas</strong>Abre una obra y elige «Agendar visita guiada» para verla en persona o en línea.</div>{% endfor %}
+{% endblock %}

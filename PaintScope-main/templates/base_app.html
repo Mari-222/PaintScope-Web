@@ -1,0 +1,66 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PaintScope{% endblock %} · PaintScope</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/paintscope.css' %}">
+</head>
+<body>
+{% include "partials/iconos.html" %}
+<div class="app-shell role-theme--{{ tema_rol }}">
+  <header class="header">
+    <div class="logo-group">
+      <a class="logo" href="{% url 'inicio' %}" aria-label="Ir al inicio de PaintScope">
+        <span class="logo__text">Paintscope</span>
+        <span class="palette" aria-hidden="true"><i></i><i></i><i></i></span>
+      </a>
+      <span class="role-badge" title="Rol actual: {{ insignia_rol.1 }}"><span aria-hidden="true">{{ insignia_rol.0 }}</span>{{ insignia_rol.1 }}</span>
+    </div>
+    <form class="search" role="search" action="{% url 'subastas:explorar' %}" method="get">
+      <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+      <label class="sr-only" for="buscar">Buscar obras</label>
+      <input id="buscar" type="search" name="q" placeholder="Buscar obras, artistas o técnicas" value="{{ q|default:'' }}">
+    </form>
+    <div class="header__spacer"></div>
+    <a class="icon-button" href="{% url 'notificaciones:lista' %}" aria-label="Notificaciones{% if sin_leer %}, {{ sin_leer }} sin leer{% endif %}">
+      <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>
+      {% if sin_leer %}<span class="count">{{ sin_leer }}</span>{% endif %}
+    </a>
+    <a class="avatar" href="{% url 'perfil' %}" title="{{ request.user.nombre_visible }}" aria-label="Mi perfil">{{ request.user.nombre_visible|slice:":1" }}</a>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar__nav" aria-label="Navegación principal">
+      {% for item in nav_items %}
+        <a class="nav-item{% if item.activo %} is-active{% endif %}" href="{% url item.url %}" title="{{ item.etiqueta }}"{% if item.activo %} aria-current="page"{% endif %}>
+          <svg class="icon" aria-hidden="true"><use href="#i-{{ item.icono }}"/></svg>
+          <span>{{ item.etiqueta }}</span>
+          {% if item.url == 'notificaciones:lista' and sin_leer %}<span class="count">{{ sin_leer }}</span>{% endif %}
+        </a>
+      {% endfor %}
+    </nav>
+    <button class="sidebar__toggle" id="sidebar-toggle" type="button" aria-label="Expandir o contraer la barra lateral">
+      <svg class="icon" aria-hidden="true" style="width:1.1rem;height:1.1rem"><use href="#i-chevron"/></svg>
+    </button>
+    <div class="sidebar__note"><b>P</b><span>Arte local,<br>historias cercanas.</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="page{% block page_class %}{% endblock %}">
+      {% if messages %}
+        <ul class="messages" role="status">
+          {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

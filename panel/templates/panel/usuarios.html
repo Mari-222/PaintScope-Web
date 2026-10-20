@@ -1,0 +1,30 @@
+{% extends "base_app.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Gestión de cuentas</span><h1 class="display-title">Usuarios y permisos</h1></div>
+  <a class="button" href="{% url 'panel:usuario_nuevo' %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-plus"/></svg> Crear usuario</a></div>
+<form method="get" class="row" style="margin-bottom:1.2rem">
+  <input class="field" style="padding:.65rem 1rem;border-radius:999px;border:1px solid rgba(40,51,59,.14);min-width:16rem" type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre o correo" aria-label="Buscar usuarios">
+  <select name="rol" aria-label="Filtrar por rol" style="padding:.65rem 1rem;border-radius:999px;border:1px solid rgba(40,51,59,.14)">
+    <option value="">Todos los roles</option>{% for v, n in roles %}<option value="{{ v }}" {% if rol == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select>
+  <button class="button button--dark" type="submit">Filtrar</button>
+</form>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+  <tbody>
+  {% for u in usuarios %}
+    <tr>
+      <td class="cell-user"><strong>{{ u.nombre_visible }}</strong><span class="muted small">{{ u.email }}</span></td>
+      <td><form method="post" action="{% url 'panel:usuario_cambiar_rol' u.pk %}" class="row">{% csrf_token %}
+        <select name="rol" aria-label="Rol de {{ u.nombre_visible }}" style="padding:.4rem .7rem;border-radius:.7rem;border:1px solid rgba(40,51,59,.14)">{% for v, n in roles %}<option value="{{ v }}" {% if u.rol == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select>
+        <button class="button button--small button--ghost" type="submit">Cambiar rol</button></form></td>
+      <td>{% if u.is_active %}<span class="status status--ok">Activa</span>{% else %}<span class="status status--bad">Suspendida</span>{% endif %}</td>
+      <td><div class="row">
+        <a class="button button--small button--ghost" href="{% url 'panel:usuario_editar' u.pk %}">Editar</a>
+        <form method="post" action="{% url 'panel:usuario_suspender' u.pk %}">{% csrf_token %}<button class="button button--small button--ghost" type="submit">{% if u.is_active %}Suspender{% else %}Reactivar{% endif %}</button></form>
+        <a class="button button--small button--ghost" href="{% url 'panel:usuario_eliminar' u.pk %}">Eliminar</a>
+      </div></td>
+    </tr>
+  {% empty %}<tr><td colspan="4" class="muted">No hay usuarios con ese filtro.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}

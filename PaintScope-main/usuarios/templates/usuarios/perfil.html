@@ -1,0 +1,63 @@
+{% extends "base_app.html" %}
+{% block title %}Mi perfil{% endblock %}
+{% block page_class %} page--narrow{% endblock %}
+{% block content %}
+<div class="section-heading">
+  <div><span class="eyebrow">Mi cuenta</span><h1 class="display-title">{{ request.user.nombre_visible }}</h1>
+    <p class="subtitle"><span class="role-badge">{{ insignia_rol.0 }} {{ request.user.get_rol_display }}</span>
+      {% if request.user.insignia_verificado %} <span class="badge-verificado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Artista verificado</span>{% endif %}</p></div>
+  <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="button button--ghost" type="submit"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-logout"/></svg> Cerrar sesión</button></form>
+</div>
+
+<div class="stat-grid">{% for etiqueta, valor in resumen %}<div class="stat"><span>{{ etiqueta }}</span><strong>{{ valor }}</strong></div>{% endfor %}</div>
+
+<form method="post" action="{% url 'perfil' %}" class="panel-card">{% csrf_token %}
+  <h2 class="block-title">Datos personales</h2>
+  {{ form.non_field_errors }}
+  <div class="form-grid">
+    <div class="field"><label for="{{ form.first_name.id_for_label }}">Nombre</label>{{ form.first_name }}{{ form.first_name.errors }}</div>
+    <div class="field"><label for="{{ form.telefono.id_for_label }}">Teléfono</label>{{ form.telefono }}{{ form.telefono.errors }}</div>
+    <div class="field field--full"><label for="{{ form.email.id_for_label }}">Correo electrónico</label>{{ form.email }}{{ form.email.errors }}</div>
+  </div>
+  <div class="form-actions"><button class="button" type="submit" name="guardar_perfil" value="1">Guardar cambios</button></div>
+</form>
+
+<details class="panel-card" {% if abrir_password %}open{% endif %}>
+  <summary>Cambiar contraseña</summary>
+  <form method="post" action="{% url 'cambiar_password' %}">{% csrf_token %}
+    {{ form_password.non_field_errors }}
+    <div class="form-grid">
+      <div class="field field--full"><label for="{{ form_password.old_password.id_for_label }}">Contraseña actual</label>{{ form_password.old_password }}{{ form_password.old_password.errors }}</div>
+      <div class="field"><label for="{{ form_password.new_password1.id_for_label }}">Nueva contraseña</label>{{ form_password.new_password1 }}{{ form_password.new_password1.errors }}</div>
+      <div class="field"><label for="{{ form_password.new_password2.id_for_label }}">Repite la nueva contraseña</label>{{ form_password.new_password2 }}{{ form_password.new_password2.errors }}</div>
+    </div>
+    <div class="form-actions"><button class="button" type="submit">Actualizar contraseña</button></div>
+  </form>
+</details>
+
+{% if request.user.es_comprador %}
+<section class="panel-card" id="pago">
+  <h2 class="block-title">Método de pago</h2>
+  <p class="muted small" style="margin-top:-.4rem">Necesitas al menos uno registrado para pujar. Solo guardamos los últimos 4 dígitos de tu tarjeta.</p>
+  {% for m in metodos %}
+    <div class="work-row" style="grid-template-columns:auto 1fr auto"><svg class="icon" aria-hidden="true"><use href="#i-card"/></svg>
+      <div><strong>{{ m.get_tipo_display }} terminada en {{ m.ultimos4 }}</strong><span class="muted small">{{ m.titular }} · vence {{ m.vencimiento }}</span></div>
+      <form method="post" action="{% url 'eliminar_metodo_pago' m.pk %}" onsubmit="return confirm('¿Eliminar este método de pago?')">{% csrf_token %}<button class="button button--small button--ghost" type="submit">Eliminar</button></form></div>
+  {% empty %}<div class="notice">Aún no tienes método de pago, así que no puedes pujar.</div>{% endfor %}
+  <details style="margin-top:1rem" {% if abrir_pago or not metodos %}open{% endif %}>
+    <summary class="link-button">Agregar tarjeta</summary>
+    <form method="post" action="{% url 'agregar_metodo_pago' %}" style="margin-top:1rem">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
+      {{ form_pago.non_field_errors }}
+      <div class="form-grid">
+        <div class="field"><label for="{{ form_pago.tipo.id_for_label }}">Tipo de tarjeta</label>{{ form_pago.tipo }}{{ form_pago.tipo.errors }}</div>
+        <div class="field"><label for="{{ form_pago.titular.id_for_label }}">Nombre del titular</label>{{ form_pago.titular }}{{ form_pago.titular.errors }}</div>
+        <div class="field"><label for="{{ form_pago.numero.id_for_label }}">Número de tarjeta</label>{{ form_pago.numero }}{{ form_pago.numero.errors }}</div>
+        <div class="field"><label for="{{ form_pago.vencimiento.id_for_label }}">Vence (MM/AA)</label>{{ form_pago.vencimiento }}{{ form_pago.vencimiento.errors }}</div>
+      </div>
+      <div class="form-actions"><button class="button" type="submit">Guardar método de pago</button></div>
+    </form>
+  </details>
+</section>
+{% endif %}
+{% endblock %}

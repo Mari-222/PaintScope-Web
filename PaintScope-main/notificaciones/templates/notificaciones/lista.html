@@ -1,0 +1,14 @@
+{% extends "base_app.html" %}
+{% load humanize %}
+{% block title %}Notificaciones{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Avisos dentro de la app</span><h1 class="display-title">Notificaciones</h1></div>
+  {% if sin_leer %}<form method="post" action="{% url 'notificaciones:marcar_todas' %}">{% csrf_token %}<button class="button button--ghost" type="submit">Marcar todas como leídas</button></form>{% endif %}</div>
+{% for n in items %}
+  <a class="notif{% if not n.leida %} is-unread{% endif %}" href="{% url 'notificaciones:abrir' n.pk %}">
+    <span class="notif__icon" aria-hidden="true"><svg class="icon"><use href="#i-{% if n.tipo == 'puja_superada' or n.tipo == 'subasta_ganada' %}gavel{% elif n.tipo == 'subasta_cerrada' %}live{% elif n.tipo == 'visita' %}calendar{% elif n.tipo == 'obra_aprobada' %}check{% elif n.tipo == 'postulacion' %}send{% else %}bell{% endif %}"/></svg></span>
+    <div><strong>{% if not n.leida %}<span class="dot-unread" aria-label="Sin leer"></span>{% endif %}{{ n.titulo }}</strong><p>{{ n.mensaje }}</p></div>
+    <time datetime="{{ n.creada|date:'c' }}">{{ n.creada|naturaltime }}</time>
+  </a>
+{% empty %}<div class="empty"><strong>No tienes avisos</strong>Te avisaremos aquí cuando superen tu puja, cierre una subasta, evalúen tu obra o se confirme una visita.</div>{% endfor %}
+{% endblock %}

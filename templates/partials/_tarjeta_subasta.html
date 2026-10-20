@@ -1,0 +1,17 @@
+{% load humanize %}
+<article class="art-card" data-subasta="{{ s.pk }}">
+  <a class="art-card__image" href="{% url 'subastas:detalle' s.pk %}">
+    {% if s.obra.imagen_src %}<img src="{{ s.obra.imagen_src }}" alt="Pintura «{{ s.obra.titulo }}»" loading="lazy">{% else %}<div class="no-image">Sin imagen</div>{% endif %}
+    <span class="art-card__timer"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>
+      {% if s.estado == 'programada' %}Abre {{ s.fecha_inicio|naturaltime }}{% else %}<span class="js-timer" data-restante="{{ s.segundos_restantes }}">{{ s.fecha_fin|timeuntil }}</span>{% endif %}
+    </span>
+  </a>
+  <div class="art-card__body">
+    <a class="art-card__title" href="{% url 'subastas:detalle' s.pk %}">{{ s.obra.titulo }}</a>
+    <div class="art-card__meta">
+      <span>{{ s.obra.artista.nombre_visible }}{% if s.obra.artista.insignia_verificado %} <span class="badge-verificado" title="Artista verificado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Verificado</span>{% endif %}</span>
+      <strong>$<span class="js-precio">{{ s.precio_actual|floatformat:0|intcomma }}</span></strong>
+    </div>
+    <div class="art-card__meta"><span>{{ s.obra.tecnica }}</span><span>Pujas: <span class="js-pujas">{{ s.n_pujas|default:0 }}</span></span></div>
+  </div>
+</article>

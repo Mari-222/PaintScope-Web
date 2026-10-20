@@ -1,0 +1,21 @@
+{% extends "base_app.html" %}
+{% block title %}Explorar{% endblock %}
+{% block content %}
+<div class="section-heading">
+  <div>
+    <span class="eyebrow">Selección de hoy</span>
+    <h1 class="display-title">Obras que cuentan historias</h1>
+    {% if q %}<p class="subtitle">Resultados para «{{ q }}»</p>{% endif %}
+  </div>
+  <span class="pill">{{ subastas|length }} obra{{ subastas|length|pluralize }}</span>
+</div>
+<nav class="chips" aria-label="Filtros de obras">
+  {% for item in filtros %}<a class="chip{% if filtro == item %} is-active{% endif %}" href="?f={{ item|urlencode }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ item }}</a>{% endfor %}
+</nav>
+{% if subastas %}
+  <div class="masonry">{% for s in subastas %}{% include "partials/_tarjeta_subasta.html" %}{% endfor %}</div>
+{% else %}
+  <div class="empty"><strong>No hay obras con ese filtro</strong>Prueba otra técnica o quita la búsqueda para ver todo el catálogo.</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/subastas.js' %}"></script>{% endblock %}

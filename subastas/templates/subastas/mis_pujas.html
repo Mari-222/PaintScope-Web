@@ -1,0 +1,32 @@
+{% extends "base_app.html" %}
+{% load humanize static %}
+{% block title %}Mis pujas{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Tu actividad</span><h1 class="display-title">Mis pujas</h1></div></div>
+<nav class="tabs" aria-label="Estado de mis pujas">
+  <a href="?tab=ganando" class="{% if pestana == 'ganando' %}is-active{% endif %}">Ganando <span>{{ conteos.ganando }}</span></a>
+  <a href="?tab=superado" class="{% if pestana == 'superado' %}is-active{% endif %}">Superado <span>{{ conteos.superado }}</span></a>
+  <a href="?tab=ganadas" class="{% if pestana == 'ganadas' %}is-active{% endif %}">Ganadas <span>{{ conteos.ganadas }}</span></a>
+</nav>
+{% if filas %}
+<div class="my-bids-grid">
+  {% for f in filas %}
+  <article class="my-bid-card" data-subasta="{{ f.s.pk }}">
+    <a href="{% url 'subastas:detalle' f.s.pk %}">{% if f.s.obra.imagen_src %}<img src="{{ f.s.obra.imagen_src }}" alt="Pintura «{{ f.s.obra.titulo }}»">{% endif %}</a>
+    <div>
+      {% if pestana == 'ganando' %}<span class="status status--winning">Ganando</span>{% elif pestana == 'superado' %}<span class="status status--outbid">Superado</span>{% else %}<span class="status status--ok">Ganada</span>{% endif %}
+      <strong>{{ f.s.obra.titulo }}</strong><span class="muted small">{{ f.s.obra.artista.nombre_visible }}</span>
+      <div class="my-bid-stats">
+        <span>Tu puja <strong>${{ f.mi_puja.monto|floatformat:0|intcomma }}</strong></span>
+        <span>Puja actual <strong>${{ f.s.precio_actual|floatformat:0|intcomma }}</strong></span>
+        {% if not f.s.cerrada %}<span>Restante <strong class="js-timer" data-restante="{{ f.s.segundos_restantes }}">{{ f.s.fecha_fin|timeuntil }}</strong></span>{% endif %}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><strong>Nada por aquí todavía</strong>{% if pestana == 'ganadas' %}Cuando ganes una subasta aparecerá en esta lista.{% else %}Explora el catálogo y haz tu primera puja.{% endif %}<p><a class="button" href="{% url 'subastas:en_vivo' %}">Ver subastas en vivo</a></p></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/subastas.js' %}"></script>{% endblock %}

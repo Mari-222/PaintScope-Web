@@ -1,0 +1,19 @@
+{% extends "base_app.html" %}
+{% load humanize %}
+{% block title %}Moderación de obras{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Control de plataforma</span><h1 class="display-title">Moderación de obras</h1></div></div>
+<nav class="chips" aria-label="Filtros de moderación">{% for f in filtros %}<a class="chip{% if filtro == f %} is-active{% endif %}" href="?f={{ f|urlencode }}">{{ f }}</a>{% endfor %}</nav>
+{% for fila in filas %}{% with o=fila.obra s=fila.subasta %}
+  <div class="work-row" style="grid-template-columns:5rem 1fr auto">
+    {% if o.imagen_src %}<img src="{{ o.imagen_src }}" alt="">{% else %}<div class="thumb"></div>{% endif %}
+    <div><strong>{{ o.titulo }}</strong><span class="muted small">{{ o.artista.nombre_visible }} · {{ o.tecnica }}{% if s %} · puja actual ${{ s.precio_actual|floatformat:0|intcomma }}{% endif %}</span><br>
+      <span class="status {% if o.restringida %}status--bad{% else %}status--ok{% endif %}">{% if o.restringida %}Restringida{% else %}Activa{% endif %}</span>
+      {% if s and s.pujas_suspendidas %}<span class="status status--wait">Pujas suspendidas</span>{% endif %}</div>
+    <div class="row">
+      <form method="post" action="{% url 'panel:obra_restringir' o.pk %}">{% csrf_token %}<button class="button button--small button--ghost" type="submit">{% if o.restringida %}Restaurar obra{% else %}Retirar del catálogo{% endif %}</button></form>
+      {% if s %}<form method="post" action="{% url 'panel:subasta_suspender_pujas' s.pk %}">{% csrf_token %}<button class="button button--small button--ghost" type="submit">{% if s.pujas_suspendidas %}Reanudar pujas{% else %}Suspender pujas{% endif %}</button></form>{% endif %}
+    </div>
+  </div>
+{% endwith %}{% empty %}<div class="empty"><strong>No hay obras con ese filtro</strong>Las obras aparecen aquí después de que un artista las postula.</div>{% endfor %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base_app.html" %}
+{% load humanize static %}
+{% block title %}{{ obra.titulo }}{% endblock %}
+{% block content %}
+<a class="button button--ghost button--small" href="{% url 'subastas:explorar' %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-arrow"/></svg> Volver a explorar</a>
+<div class="detail-grid" style="margin-top:1.2rem" id="detalle" data-poll="detalle" data-url="{% url 'subastas:api_estado' s.pk %}" data-subasta="{{ s.pk }}" data-estado="{{ s.estado }}">
+  <div class="detail-visual">{% if obra.imagen_src %}<img src="{{ obra.imagen_src }}" alt="Pintura «{{ obra.titulo }}»">{% else %}<div class="no-image">Sin imagen</div>{% endif %}</div>
+  <div>
+    <span class="eyebrow">{{ s.evento.nombre }} · Pieza única</span>
+    <h1 class="detail-title">{{ obra.titulo }}</h1>
+    <a class="artist-link" href="{% url 'obras:perfil_artista' obra.artista.pk %}">por {{ obra.artista.nombre_visible }}</a>
+    {% if obra.artista.insignia_verificado %}<span class="badge-verificado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Verificado</span>{% endif %}
+
+    <div class="detail-stats">
+      <div><span>{% if s.cerrada %}Precio final{% else %}Puja actual{% endif %}</span><strong>$<span class="js-precio">{{ s.precio_actual|floatformat:0|intcomma }}</span></strong>
+        <small class="muted">Pujas: <span class="js-pujas">{{ s.total_pujas }}</span> · base ${{ obra.precio_base|floatformat:0|intcomma }}</small></div>
+      <div><span>{% if s.cerrada %}Estado{% else %}Tiempo restante{% endif %}</span>
+        {% if s.cerrada %}<strong>Cerrada</strong>{% else %}<strong class="countdown js-timer" data-restante="{{ s.segundos_restantes }}">{{ s.fecha_fin|timeuntil }}</strong>{% endif %}
+        <small class="extended js-extension" {% if not s.extensiones %}hidden{% endif %}>Se extendió <span class="js-ext-n">{{ s.extensiones }}</span> vez(ces)</small></div>
+    </div>
+
+    <div class="facts"><span><small>Técnica</small>{{ obra.tecnica }}</span><span><small>Medidas</small>{{ obra.dimensiones }}</span><span><small>Año</small>{{ obra.anio|default:"—" }}</span></div>
+    <p class="description">{{ obra.descripcion }}</p>
+
+    {% if s.cerrada %}
+      <div class="bid-box"><span class="eyebrow">Resultado</span>
+        {% if s.ganador %}<p><strong>{{ s.ganador.nombre_visible }}</strong> ganó esta subasta con ${{ s.precio_actual|floatformat:0|intcomma }}.</p>{% else %}<p>La subasta cerró sin pujas.</p>{% endif %}</div>
+    {% elif puede_pujar %}
+      <div class="bid-box">
+        <span class="eyebrow">Haz tu puja</span>
+        {% if lidera %}<p class="status status--winning"><svg class="icon" aria-hidden="true" style="width:.8rem;height:.8rem"><use href="#i-check"/></svg> Vas liderando esta subasta</p>{% endif %}
+        {% if motivo_bloqueo == "pago" %}
+          <div class="notice">Para pujar necesitas un método de pago registrado. <a href="{% url 'perfil' %}#pago">Registrarlo en mi perfil</a>.</div>
+        {% elif motivo_bloqueo %}
+          <div class="notice">{{ motivo_bloqueo }}</div>
+        {% else %}
+          <form method="post" action="{% url 'subastas:pujar' s.pk %}" id="bid-form">{% csrf_token %}
+            <div class="bid-input-row">
+              <button type="button" id="bid-minus" aria-label="Reducir monto"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button>
+              <label><span>USD</span><input id="bid-monto" name="monto" type="number" inputmode="numeric" min="{{ s.monto_minimo|floatformat:0 }}" step="1" value="{{ sugerida|floatformat:0 }}" aria-label="Monto de la puja" required></label>
+              <button type="button" id="bid-plus" aria-label="Aumentar monto"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
+            </div>
+            <p class="small muted" style="margin:0 0 .8rem">Debe ser mayor a la puja actual de $<span class="js-precio">{{ s.precio_actual|floatformat:0|intcomma }}</span>.</p>
+            <button class="button" type="submit">Pujar ahora</button>
+          </form>
+        {% endif %}
+      </div>
+    {% elif request.user.es_curador or request.user.es_admin or request.user.es_artista %}
+      <div class="bid-box"><span class="eyebrow">Solo lectura</span><p class="muted small" style="margin:0">Solo los compradores pueden pujar. Tu rol puede seguir la subasta en tiempo real.</p></div>
+    {% endif %}
+
+    {% if puede_pujar and not s.cerrada %}
+      <p style="margin-top:1rem"><a class="button button--ghost" href="{% url 'visitas:agendar' obra.pk %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-calendar"/></svg> Agendar visita guiada</a></p>
+    {% endif %}
+
+    {% if historial %}
+      <ul class="history" aria-label="Últimas pujas">{% for p in historial %}<li><span>{{ p.comprador.nombre_visible }}</span><strong>${{ p.monto|floatformat:0|intcomma }}</strong></li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+</div>
+
+<dialog class="modal" id="bid-dialog" aria-labelledby="bid-dialog-title">
+  <span class="eyebrow">Un último paso</span>
+  <h2 class="modal-title" id="bid-dialog-title">Confirma tu puja</h2>
+  <div class="modal-line"><span>Obra</span><strong>{{ obra.titulo }}</strong></div>
+  <div class="modal-line"><span>Tu puja</span><strong>$<span id="bid-dialog-monto"></span></strong></div>
+  <div class="form-actions"><button class="button" type="button" id="bid-confirm">Confirmar puja</button><button class="button button--ghost" type="button" id="bid-cancel">Cancelar</button></div>
+</dialog>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/subastas.js' %}"></script>{% endblock %}

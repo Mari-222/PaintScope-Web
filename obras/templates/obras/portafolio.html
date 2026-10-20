@@ -1,0 +1,35 @@
+{% extends "base_app.html" %}
+{% block title %}Mi portafolio{% endblock %}
+{% block content %}
+<div class="section-heading">
+  <div><span class="eyebrow">Mi portafolio</span><h1 class="display-title">Tus obras</h1>
+    <p class="subtitle">Carga una obra como borrador y postúlala a un evento temático para que un curador la evalúe.</p></div>
+  <a class="button" href="{% url 'obras:obra_nueva' %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-plus"/></svg> Añadir obra</a>
+</div>
+<nav class="tabs" aria-label="Filtrar portafolio">
+  <a href="?ver=todas" class="{% if pestana != 'borradores' %}is-active{% endif %}">Todas las obras <span>{{ total }}</span></a>
+  <a href="?ver=borradores" class="{% if pestana == 'borradores' %}is-active{% endif %}">Borradores <span>{{ borradores }}</span></a>
+</nav>
+{% for obra in obras %}
+  <div class="work-row">
+    {% if obra.imagen_src %}<img src="{{ obra.imagen_src }}" alt="">{% else %}<div class="thumb"></div>{% endif %}
+    <div>
+      <strong>{{ obra.titulo }}</strong>
+      <span class="muted small">{{ obra.tecnica }} · {{ obra.dimensiones }}</span><br>
+      <span class="status {% if obra.estado == 'borrador' %}status--wait{% elif obra.estado == 'vendida' %}status--ok{% elif obra.estado == 'en_subasta' %}status--winning{% endif %}">{{ obra.get_estado_display }}</span>
+      {% if obra.motivo_rechazo and obra.estado == 'borrador' %}<p class="small" style="margin:.4rem 0 0;color:#8d3a22"><strong>Motivo del rechazo:</strong> {{ obra.motivo_rechazo }}</p>{% endif %}
+    </div>
+    <div class="row">
+      {% if obra.estado == 'borrador' %}
+        <a class="button button--small" href="{% url 'obras:postular' obra.pk %}">Postular</a>
+        <a class="button button--small button--ghost" href="{% url 'obras:obra_editar' obra.pk %}">Editar</a>
+        <form method="post" action="{% url 'obras:obra_eliminar' obra.pk %}" onsubmit="return confirm('¿Eliminar este borrador?')">{% csrf_token %}<button class="button button--small button--ghost" type="submit">Eliminar</button></form>
+      {% else %}
+        {% with sub=obra.subastas.last %}{% if sub %}<a class="button button--small button--ghost" href="{% url 'subastas:detalle' sub.pk %}">Ver subasta</a>{% endif %}{% endwith %}
+      {% endif %}
+    </div>
+  </div>
+{% empty %}
+  <div class="empty"><strong>{% if pestana == 'borradores' %}No tienes borradores{% else %}Tu portafolio está vacío{% endif %}</strong>Añade tu primera obra con título, técnica, medidas e imagen.<p><a class="button" href="{% url 'obras:obra_nueva' %}">Añadir una obra</a></p></div>
+{% endfor %}
+{% endblock %}

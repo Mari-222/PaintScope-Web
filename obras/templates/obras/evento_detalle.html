@@ -1,0 +1,29 @@
+{% extends "base_app.html" %}
+{% block title %}{{ evento.nombre }}{% endblock %}
+{% block content %}
+<div class="section-heading">
+  <div><span class="eyebrow">{{ evento.tematica }} · {{ evento.temporada }}</span><h1 class="display-title">{{ evento.nombre }}</h1>
+    <p class="subtitle">Subastas del {{ evento.fecha_inicio|date:"d/m/Y H:i" }} al {{ evento.fecha_fin|date:"d/m/Y H:i" }} · convocatoria hasta el {{ evento.cierre_convocatoria|date:"d/m/Y H:i" }}</p></div>
+  <div class="row">
+    <span class="status {% if evento.publicado %}status--ok{% else %}status--wait{% endif %}">{% if evento.publicado %}Publicado{% else %}Borrador{% endif %}</span>
+    <a class="button button--ghost button--small" href="{% url 'obras:evento_editar' evento.pk %}">Editar</a>
+    <form method="post" action="{% url 'obras:evento_publicar' evento.pk %}">{% csrf_token %}<button class="button button--small" type="submit">{% if evento.publicado %}Pasar a borrador{% else %}Publicar evento{% endif %}</button></form>
+  </div>
+</div>
+<h2 class="block-title">Obras en este evento ({{ subastas|length }})</h2>
+{% for s in subastas %}
+  <div class="work-row">{% if s.obra.imagen_src %}<img src="{{ s.obra.imagen_src }}" alt="">{% else %}<div class="thumb"></div>{% endif %}
+    <div><strong>{{ s.obra.titulo }}</strong><span class="muted small">{{ s.obra.artista.nombre_visible }} · base ${{ s.obra.precio_base|floatformat:0 }}</span></div>
+    <a class="button button--small button--ghost" href="{% url 'subastas:detalle' s.pk %}">{{ s.get_estado_display }}</a></div>
+{% empty %}<div class="empty">Todavía no hay obras en este evento.</div>{% endfor %}
+
+<h2 class="block-title" style="margin-top:2rem">Asociar una obra aprobada</h2>
+<form method="post" action="{% url 'obras:evento_incluir_obra' evento.pk %}" class="panel-card">{% csrf_token %}
+  {% if disponibles %}
+    <div class="row"><select name="obra" aria-label="Obra aprobada" class="field" style="flex:1;padding:.7rem;border-radius:.9rem;border:1px solid rgba(40,51,59,.14)">
+      {% for o in disponibles %}<option value="{{ o.pk }}">{{ o.titulo }} — {{ o.artista.nombre_visible }} (base ${{ o.precio_base|floatformat:0 }})</option>{% endfor %}</select>
+      <button class="button" type="submit" {% if not evento.publicado %}disabled{% endif %}>Incluir en el evento</button></div>
+    {% if not evento.publicado %}<p class="helptext">Publica el evento para poder asociarle obras.</p>{% endif %}
+  {% else %}<p class="muted" style="margin:0">No hay obras aprobadas sin subasta. Las obras aprobadas en una postulación se incluyen automáticamente en su evento.</p>{% endif %}
+</form>
+{% endblock %}

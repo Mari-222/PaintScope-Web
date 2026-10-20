@@ -1,0 +1,18 @@
+{% extends "base_app.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_class %} page--narrow{% endblock %}
+{% block content %}
+<span class="eyebrow">Eventos temáticos</span><h1 class="display-title">{{ titulo }}</h1>
+<form method="post" class="panel-card" style="margin-top:1.4rem">{% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="form-grid">
+    <div class="field field--full"><label for="{{ form.nombre.id_for_label }}">Nombre</label>{{ form.nombre }}{{ form.nombre.errors }}</div>
+    <div class="field"><label for="{{ form.tematica.id_for_label }}">Temática</label>{{ form.tematica }}{{ form.tematica.errors }}</div>
+    <div class="field"><label for="{{ form.temporada.id_for_label }}">Temporada</label>{{ form.temporada }}<span class="helptext">{{ form.temporada.help_text }}</span>{{ form.temporada.errors }}</div>
+    <div class="field"><label for="{{ form.fecha_inicio.id_for_label }}">Inicio de las subastas</label>{{ form.fecha_inicio }}{{ form.fecha_inicio.errors }}</div>
+    <div class="field"><label for="{{ form.fecha_fin.id_for_label }}">Fin de las subastas</label>{{ form.fecha_fin }}{{ form.fecha_fin.errors }}</div>
+    <div class="field field--full"><label for="{{ form.cierre_convocatoria.id_for_label }}">Cierre de la convocatoria</label>{{ form.cierre_convocatoria }}<span class="helptext">{{ form.cierre_convocatoria.help_text }}</span>{{ form.cierre_convocatoria.errors }}</div>
+  </div>
+  <div class="form-actions"><button class="button" type="submit">Guardar evento</button><a class="button button--ghost" href="{% url 'obras:eventos' %}">Cancelar</a></div>
+</form>
+{% endblock %}

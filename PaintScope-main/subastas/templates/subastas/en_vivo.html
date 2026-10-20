@@ -1,0 +1,26 @@
+{% extends "base_app.html" %}
+{% load humanize static %}
+{% block title %}Subastas en vivo{% endblock %}
+{% block content %}
+<div class="section-heading">
+  <div><span class="eyebrow">Ahora mismo</span><h1 class="display-title">Subastas en vivo</h1>
+    <p class="subtitle">El dashboard se actualiza solo: las pujas nuevas aparecen en menos de 3 segundos.</p></div>
+  <span class="live-pill"><i></i> {{ subastas|length }} activa{{ subastas|length|pluralize }}</span>
+</div>
+{% if subastas %}
+<div class="live-list" data-poll="dashboard" data-url="{% url 'subastas:api_dashboard' %}">
+  {% for s in subastas %}
+  <article class="live-card" data-subasta="{{ s.pk }}">
+    <a class="live-card__image" href="{% url 'subastas:detalle' s.pk %}">{% if s.obra.imagen_src %}<img src="{{ s.obra.imagen_src }}" alt="Pintura «{{ s.obra.titulo }}»">{% endif %}</a>
+    <div class="live-card__info"><span class="eyebrow">{{ s.obra.tecnica }}</span><strong>{{ s.obra.titulo }}</strong><span>{{ s.obra.artista.nombre_visible }}</span></div>
+    <div class="live-card__bid"><span>Puja actual</span><strong>$<span class="js-precio">{{ s.precio_actual|floatformat:0|intcomma }}</span></strong><small>Pujas: <span class="js-pujas">{{ s.n_pujas }}</span></small></div>
+    <div class="live-card__timer"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span class="js-timer" data-restante="{{ s.segundos_restantes }}">{{ s.fecha_fin|timeuntil }}</span></div>
+    <a class="button" href="{% url 'subastas:detalle' s.pk %}">Ver subasta</a>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><strong>No hay subastas activas por ahora</strong>Cuando un curador apruebe obras y un evento esté en curso, las verás aquí.</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/subastas.js' %}"></script>{% endblock %}

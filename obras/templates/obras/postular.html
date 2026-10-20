@@ -1,0 +1,27 @@
+{% extends "base_app.html" %}
+{% load humanize %}
+{% block title %}Postular obra{% endblock %}
+{% block page_class %} page--narrow{% endblock %}
+{% block content %}
+<span class="eyebrow">Nueva postulación</span>
+<h1 class="display-title">Postular «{{ obra.titulo }}»</h1>
+<p class="subtitle">Elige el evento temático. Un curador revisará la obra y definirá su precio base de salida.</p>
+<form method="post" class="panel-card" style="margin-top:1.4rem">{% csrf_token %}
+  {{ form.non_field_errors }}
+  {% if eventos %}
+  <div class="stack">
+    {% for e in eventos %}
+    <div class="work-row" style="grid-template-columns:auto 1fr auto">
+      <input type="radio" name="evento" id="ev{{ e.pk }}" value="{{ e.pk }}" {% if not e.convocatoria_abierta %}disabled{% endif %} {% if form.evento.value == e.pk|stringformat:'s' %}checked{% endif %}>
+      <label for="ev{{ e.pk }}"><strong>{{ e.nombre }}</strong><span class="muted small">{{ e.tematica }} · {{ e.temporada }}</span></label>
+      {% if e.convocatoria_abierta %}<span class="status status--ok">Abierta hasta {{ e.cierre_convocatoria|date:"d/m H:i" }}</span>{% else %}<span class="status status--bad">Convocatoria cerrada</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {{ form.evento.errors }}
+  <div class="form-actions"><button class="button" type="submit">Enviar postulación</button><a class="button button--ghost" href="{% url 'obras:portafolio' %}">Cancelar</a></div>
+  {% else %}
+  <div class="empty"><strong>No hay eventos publicados</strong>Cuando un curador publique un evento con convocatoria abierta, podrás postular aquí.</div>
+  {% endif %}
+</form>
+{% endblock %}

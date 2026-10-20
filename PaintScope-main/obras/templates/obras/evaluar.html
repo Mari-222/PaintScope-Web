@@ -1,0 +1,27 @@
+{% extends "base_app.html" %}
+{% block title %}Evaluar obra{% endblock %}
+{% block content %}
+<a class="button button--ghost button--small" href="{% url 'obras:postulaciones' %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-arrow"/></svg> Volver a postulaciones</a>
+<div class="detail-grid" style="margin-top:1.2rem">
+  <div class="detail-visual">{% if obra.imagen_src %}<img src="{{ obra.imagen_src }}" alt="Pintura «{{ obra.titulo }}»">{% else %}<div class="no-image">Sin imagen</div>{% endif %}</div>
+  <div>
+    <span class="eyebrow">Revisión curatorial · {{ p.evento.nombre }}</span>
+    <h1 class="detail-title">{{ obra.titulo }}</h1>
+    <p class="artist-link" style="margin:0">por {{ obra.artista.nombre_visible }}{% if obra.artista.insignia_verificado %} <span class="badge-verificado">Verificado</span>{% endif %}</p>
+    <div class="facts" style="margin-top:1rem"><span><small>Técnica</small>{{ obra.tecnica }}</span><span><small>Medidas</small>{{ obra.dimensiones }}</span><span><small>Año</small>{{ obra.anio|default:"—" }}</span></div>
+    <p class="description">{{ obra.descripcion }}</p>
+    <form method="post" class="bid-box">{% csrf_token %}
+      <span class="eyebrow">Tu decisión</span>
+      {{ form.non_field_errors }}
+      <div class="stack">
+        <div class="field"><label for="id_precio_base">Precio base de salida (USD)</label><input type="number" min="1" step="1" name="precio_base" id="id_precio_base" value="{{ form.precio_base.value|default:'' }}" placeholder="Ej. 800">{{ form.precio_base.errors }}</div>
+        <div class="field"><label for="id_motivo">Motivo (solo si rechazas)</label><textarea name="motivo" id="id_motivo" rows="3" placeholder="Explica al artista qué debe corregir">{{ form.motivo.value|default:'' }}</textarea>{{ form.motivo.errors }}</div>
+      </div>
+      <div class="form-actions">
+        <button class="button" type="submit" name="decision" value="aprobar"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-check"/></svg> Aprobar con este precio</button>
+        <button class="button button--danger" type="submit" name="decision" value="rechazar">Rechazar obra</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base_app.html" %}
+{% block title %}Panel de administración{% endblock %}
+{% block content %}
+<div class="section-heading"><div><span class="eyebrow">Control de la plataforma</span><h1 class="display-title">Panel administrativo</h1></div></div>
+<div class="stat-grid">
+  <div class="stat"><span>Usuarios activos</span><strong>{{ usuarios_activos }}</strong></div>
+  <div class="stat"><span>Cuentas suspendidas</span><strong>{{ suspendidos }}</strong></div>
+  <div class="stat"><span>Obras en la plataforma</span><strong>{{ obras }}</strong></div>
+  <div class="stat"><span>Subastas activas</span><strong>{{ activas }}</strong></div>
+  <div class="stat"><span>Postulaciones pendientes</span><strong>{{ pendientes }}</strong></div>
+</div>
+<div class="quick-links">
+  <a href="{% url 'panel:usuarios' %}">Usuarios<small>Crear, editar, suspender y cambiar roles</small></a>
+  <a href="{% url 'panel:roles' %}">Roles y permisos<small>Qué puede hacer cada rol</small></a>
+  <a href="{% url 'panel:parametros' %}">Parámetros globales<small>Extensión de subastas, agenda de visitas, mantenimiento</small></a>
+  <a href="{% url 'panel:moderacion' %}">Moderación de obras<small>Retirar obras y suspender pujas</small></a>
+</div>
+{% endblock %}
