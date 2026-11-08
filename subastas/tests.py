@@ -85,6 +85,15 @@ class PujaTests(TestCase):  # PAIN-22 · PAIN-24 · RF-09 · RF-16 · CU-06
         Subasta.objects.filter(pk=self.subasta.pk).update(fecha_fin=timezone.now() - timedelta(minutes=1))
         with self.assertRaises(services.PujaRechazada):
             services.registrar_puja(self.subasta.pk, self.comprador, 900)
+            
+    def test_puja_confirmada_notifica_al_comprador(self):
+        self.pujar("550")
+        aviso = Notificacion.objects.get(usuario=self.comprador, tipo="puja_confirmada")
+        self.assertIn("550", aviso.mensaje)
+
+    def test_puja_rechazada_no_genera_confirmacion(self):
+        self.pujar("100")
+        self.assertFalse(Notificacion.objects.filter(tipo="puja_confirmada").exists())
 
 
 class ExtensionDinamicaTests(TestCase):  # PAIN-23 · RF-10

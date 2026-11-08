@@ -165,6 +165,14 @@ def registrar_puja(subasta_id, usuario, monto):
             notificar(anterior.comprador, "puja_superada", "Superaron tu puja",
                       f"Alguien ofreció ${monto:,.0f} por «{subasta.obra.titulo}».",
                       reverse("subastas:detalle", args=[subasta.pk]))
+
+        # RF-14: confirmar la puja a quien la hizo
+        mensaje = f"Tu puja de ${monto:,.0f} por «{subasta.obra.titulo}» quedó registrada."
+        if extendida:
+            mensaje += " Entró al final, así que el cierre se extendió."
+        notificar(usuario, "puja_confirmada", "Puja confirmada", mensaje,
+                  reverse("subastas:detalle", args=[subasta.pk]))
+
     puja.extendida = extendida
     return puja
 

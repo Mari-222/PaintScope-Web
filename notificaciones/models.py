@@ -7,6 +7,7 @@ class Notificacion(models.Model):
 
     class Tipo(models.TextChoices):
         PUJA_SUPERADA = "puja_superada", "Puja superada"
+        PUJA_CONFIRMADA = "puja_confirmada", "Puja confirmada"
         SUBASTA_CERRADA = "subasta_cerrada", "Subasta cerrada"
         SUBASTA_GANADA = "subasta_ganada", "Subasta ganada"
         OBRA_APROBADA = "obra_aprobada", "Obra aprobada"

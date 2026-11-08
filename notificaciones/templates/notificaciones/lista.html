@@ -6,7 +6,7 @@
   {% if sin_leer %}<form method="post" action="{% url 'notificaciones:marcar_todas' %}">{% csrf_token %}<button class="button button--ghost" type="submit">Marcar todas como leídas</button></form>{% endif %}</div>
 {% for n in items %}
   <a class="notif{% if not n.leida %} is-unread{% endif %}" href="{% url 'notificaciones:abrir' n.pk %}">
-    <span class="notif__icon" aria-hidden="true"><svg class="icon"><use href="#i-{% if n.tipo == 'puja_superada' or n.tipo == 'subasta_ganada' %}gavel{% elif n.tipo == 'subasta_cerrada' %}live{% elif n.tipo == 'visita' %}calendar{% elif n.tipo == 'obra_aprobada' %}check{% elif n.tipo == 'postulacion' %}send{% else %}bell{% endif %}"/></svg></span>
+    <span class="notif__icon" aria-hidden="true"><svg class="icon"><use href="#i-{% if n.tipo == 'puja_superada' or n.tipo == 'subasta_ganada' or n.tipo == 'puja_confirmada' %}gavel{% elif n.tipo == 'subasta_cerrada' %}live{% elif n.tipo == 'visita' %}calendar{% elif n.tipo == 'obra_aprobada' %}check{% elif n.tipo == 'postulacion' %}send{% else %}bell{% endif %}"/></svg></span>
     <div><strong>{% if not n.leida %}<span class="dot-unread" aria-label="Sin leer"></span>{% endif %}{{ n.titulo }}</strong><p>{{ n.mensaje }}</p></div>
     <time datetime="{{ n.creada|date:'c' }}">{{ n.creada|naturaltime }}</time>
   </a>
