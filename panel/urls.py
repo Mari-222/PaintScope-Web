@@ -17,4 +17,5 @@ urlpatterns = [
     path("moderacion/", views.moderacion, name="moderacion"),
     path("moderacion/obra/<int:pk>/restringir/", views.obra_restringir, name="obra_restringir"),
     path("moderacion/subasta/<int:pk>/pujas/", views.subasta_suspender_pujas, name="subasta_suspender_pujas"),
+    path("usuarios/<int:pk>/verificar/", views.usuario_verificar, name="usuario_verificar"),
 ]

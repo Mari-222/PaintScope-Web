@@ -85,7 +85,7 @@ class PujaTests(TestCase):  # PAIN-22 · PAIN-24 · RF-09 · RF-16 · CU-06
         Subasta.objects.filter(pk=self.subasta.pk).update(fecha_fin=timezone.now() - timedelta(minutes=1))
         with self.assertRaises(services.PujaRechazada):
             services.registrar_puja(self.subasta.pk, self.comprador, 900)
-            
+
     def test_puja_confirmada_notifica_al_comprador(self):
         self.pujar("550")
         aviso = Notificacion.objects.get(usuario=self.comprador, tipo="puja_confirmada")
@@ -162,7 +162,8 @@ class CierreTests(TestCase):  # RF-14 · cierre de subasta
     def test_cierre_es_idempotente(self):
         services.registrar_puja(self.subasta.pk, self.a, 250)
         self.vencer()
-        services.sincronizar_estados(); services.sincronizar_estados()
+        services.sincronizar_estados()
+        services.sincronizar_estados()
         self.assertEqual(Notificacion.objects.filter(usuario=self.a, tipo="subasta_ganada").count(), 1)
 
     def test_sin_pujas_la_obra_vuelve_a_aprobada(self):

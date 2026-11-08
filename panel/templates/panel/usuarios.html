@@ -14,12 +14,13 @@
   <tbody>
   {% for u in usuarios %}
     <tr>
-      <td class="cell-user"><strong>{{ u.nombre_visible }}</strong><span class="muted small">{{ u.email }}</span></td>
+      <td class="cell-user"><strong>{{ u.nombre_visible }}{% if u.insignia_verificado %} <span class="badge-verificado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Verificado</span>{% endif %}</strong><span class="muted small">{{ u.email }}</span></td>
       <td><form method="post" action="{% url 'panel:usuario_cambiar_rol' u.pk %}" class="row">{% csrf_token %}
         <select name="rol" aria-label="Rol de {{ u.nombre_visible }}" style="padding:.4rem .7rem;border-radius:.7rem;border:1px solid rgba(40,51,59,.14)">{% for v, n in roles %}<option value="{{ v }}" {% if u.rol == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select>
         <button class="button button--small button--ghost" type="submit">Cambiar rol</button></form></td>
       <td>{% if u.is_active %}<span class="status status--ok">Activa</span>{% else %}<span class="status status--bad">Suspendida</span>{% endif %}</td>
       <td><div class="row">
+        {% if u.rol == 'artista' %}<form method="post" action="{% url 'panel:usuario_verificar' u.pk %}">{% csrf_token %}<button class="button button--small button--ghost" type="submit">{% if u.insignia_verificado %}Quitar verificado{% else %}Verificar{% endif %}</button></form>{% endif %}
         <a class="button button--small button--ghost" href="{% url 'panel:usuario_editar' u.pk %}">Editar</a>
         <form method="post" action="{% url 'panel:usuario_suspender' u.pk %}">{% csrf_token %}<button class="button button--small button--ghost" type="submit">{% if u.is_active %}Suspender{% else %}Reactivar{% endif %}</button></form>
         <a class="button button--small button--ghost" href="{% url 'panel:usuario_eliminar' u.pk %}">Eliminar</a>

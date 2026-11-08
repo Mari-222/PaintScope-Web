@@ -2,7 +2,9 @@ from django.contrib import messages
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from django.urls import reverse
 
+from notificaciones.servicio import notificar
 from obras.models import Obra, Postulacion
 from subastas.models import Subasta
 from usuarios.decorators import rol_requerido
@@ -187,3 +189,19 @@ def subasta_suspender_pujas(request, pk):
     subasta.save(update_fields=["pujas_suspendidas"])
     messages.success(request, "Pujas suspendidas." if subasta.pujas_suspendidas else "Pujas reanudadas.")
     return redirect("panel:moderacion")
+
+@rol_requerido("admin")
+@require_POST
+def usuario_verificar(request, pk):
+    """El administrador otorga o quita la insignia de verificado a un artista."""
+    artista = get_object_or_404(Usuario, pk=pk, rol=Usuario.Rol.ARTISTA)
+    artista.insignia_verificado = not artista.insignia_verificado
+    artista.save(update_fields=["insignia_verificado"])
+    if artista.insignia_verificado:
+        notificar(artista, "sistema", "Ya eres artista verificado",
+                  "Un administrador verificó tu perfil. Ahora tu perfil y tus obras llevan el sello de Verificado.",
+                  reverse("obras:perfil_artista", args=[artista.pk]))
+        messages.success(request, f"{artista.nombre_visible} ahora es artista verificado.")
+    else:
+        messages.success(request, f"Se quitó la insignia de verificado a {artista.nombre_visible}.")
+    return redirect("panel:usuarios")

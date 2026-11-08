@@ -1,11 +1,8 @@
-from datetime import timedelta
-
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
 
 from config import testutils as f
-from subastas.models import Subasta
+from notificaciones.models import Notificacion
 from usuarios.models import Usuario
 from . import parametros
 
@@ -40,18 +37,22 @@ class UsuariosPanelTests(PanelBase):  # PAIN-29 · RF-15 · CU-08
     def test_suspende_y_reactiva(self):
         u = f.usuario("comprador")
         self.client.post(reverse("panel:usuario_suspender", args=[u.pk]))
-        u.refresh_from_db(); self.assertFalse(u.is_active)
+        u.refresh_from_db()
+        self.assertFalse(u.is_active)
         self.client.post(reverse("panel:usuario_suspender", args=[u.pk]))
-        u.refresh_from_db(); self.assertTrue(u.is_active)
+        u.refresh_from_db()
+        self.assertTrue(u.is_active)
 
     def test_suspender_con_actividad_pide_confirmacion_adicional(self):
         artista = f.usuario("artista")
         f.subasta_activa(artista=artista)
         r = self.client.post(reverse("panel:usuario_suspender", args=[artista.pk]))
         self.assertContains(r, "actividad en curso")
-        artista.refresh_from_db(); self.assertTrue(artista.is_active)
+        artista.refresh_from_db()
+        self.assertTrue(artista.is_active)
         self.client.post(reverse("panel:usuario_suspender", args=[artista.pk]), {"confirmar": "1"})
-        artista.refresh_from_db(); self.assertFalse(artista.is_active)
+        artista.refresh_from_db()
+        self.assertFalse(artista.is_active)
 
     def test_eliminar_con_actividad_exige_confirmar(self):
         artista = f.usuario("artista")
@@ -76,12 +77,34 @@ class UsuariosPanelTests(PanelBase):  # PAIN-29 · RF-15 · CU-08
     def test_cambia_rol_y_lista_filtra(self):
         u = f.usuario("comprador", nombre="Zoe")
         self.client.post(reverse("panel:usuario_cambiar_rol", args=[u.pk]), {"rol": "curador"})
-        u.refresh_from_db(); self.assertEqual(u.rol, "curador")
+        u.refresh_from_db()
+        self.assertEqual(u.rol, "curador")
         r = self.client.get(reverse("panel:usuarios") + "?rol=curador&q=zoe")
         self.assertContains(r, "Zoe")
 
     def test_matriz_de_roles_carga(self):
         self.assertContains(self.client.get(reverse("panel:roles")), "Pujar en subastas")
+
+    def test_admin_verifica_y_quita_la_insignia_a_un_artista(self):
+        artista = f.usuario("artista")
+        self.client.post(reverse("panel:usuario_verificar", args=[artista.pk]))
+        artista.refresh_from_db()
+        self.assertTrue(artista.insignia_verificado)
+        self.assertTrue(Notificacion.objects.filter(usuario=artista, titulo__contains="verificado").exists())
+        self.client.post(reverse("panel:usuario_verificar", args=[artista.pk]))
+        artista.refresh_from_db()
+        self.assertFalse(artista.insignia_verificado)
+
+    def test_solo_los_artistas_se_pueden_verificar(self):
+        comprador = f.usuario("comprador")
+        r = self.client.post(reverse("panel:usuario_verificar", args=[comprador.pk]))
+        self.assertEqual(r.status_code, 404)
+
+    def test_otros_roles_no_pueden_verificar(self):
+        artista = f.usuario("artista")
+        self.client.force_login(f.usuario("curador"))
+        r = self.client.post(reverse("panel:usuario_verificar", args=[artista.pk]))
+        self.assertEqual(r.status_code, 403)
 
 
 class ParametrosTests(PanelBase):
@@ -114,17 +137,21 @@ class ModeracionTests(PanelBase):
     def test_retirar_obra_la_oculta_del_catalogo(self):
         s = f.subasta_activa()
         self.client.post(reverse("panel:obra_restringir", args=[s.obra.pk]))
-        s.obra.refresh_from_db(); self.assertTrue(s.obra.restringida)
+        s.obra.refresh_from_db()
+        self.assertTrue(s.obra.restringida)
         self.client.force_login(f.usuario("comprador"))
         self.assertNotContains(self.client.get(reverse("subastas:explorar")), "Costa quieta")
         self.client.force_login(self.admin)
         self.client.post(reverse("panel:obra_restringir", args=[s.obra.pk]))
-        s.obra.refresh_from_db(); self.assertFalse(s.obra.restringida)
+        s.obra.refresh_from_db()
+        self.assertFalse(s.obra.restringida)
 
     def test_suspender_y_reanudar_pujas(self):
         s = f.subasta_activa()
         self.client.post(reverse("panel:subasta_suspender_pujas", args=[s.pk]))
-        s.refresh_from_db(); self.assertTrue(s.pujas_suspendidas)
+        s.refresh_from_db()
+        self.assertTrue(s.pujas_suspendidas)
         self.assertContains(self.client.get(reverse("panel:moderacion") + "?f=Pujas+suspendidas"), "Costa quieta")
         self.client.post(reverse("panel:subasta_suspender_pujas", args=[s.pk]))
-        s.refresh_from_db(); self.assertFalse(s.pujas_suspendidas)
+        s.refresh_from_db()
+        self.assertFalse(s.pujas_suspendidas)
