@@ -10,6 +10,7 @@ MENUS = {
     "artista": [
         ("Mi portafolio", "palette", "obras:portafolio", ("obras:portafolio", "obras:obra_nueva", "obras:obra_editar", "obras:postular")),
         ("Mis postulaciones", "send", "obras:mis_postulaciones", ("obras:mis_postulaciones",)),
+        ("Mis pujas", "gavel", "subastas:mis_pujas", ("subastas:mis_pujas",)),
         _EXPLORAR, _ARTISTAS, _AVISOS, _PERFIL,
     ],
     "comprador": [

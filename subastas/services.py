@@ -137,8 +137,10 @@ def registrar_puja(subasta_id, usuario, monto):
             raise PujaRechazada("Esta subasta no está abierta para pujas.")
         if subasta.pujas_suspendidas:
             raise PujaRechazada("Las pujas de esta obra están suspendidas por moderación.")
-        if not usuario.es_comprador:
-            raise PujaRechazada("Solo los compradores pueden pujar.")
+        if not usuario.puede_pujar:
+            raise PujaRechazada("Tu rol no puede pujar en subastas.")
+        if subasta.obra.artista_id == usuario.pk:
+            raise PujaRechazada("No puedes pujar por tu propia obra.")
         if not usuario.tiene_metodo_pago:
             raise PujaRechazada("Registra un método de pago en tu perfil para poder pujar.")
         if monto <= subasta.precio_actual:

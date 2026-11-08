@@ -9,6 +9,7 @@ from django.utils import timezone
 from config import testutils as f
 from notificaciones.models import Notificacion
 from panel import parametros
+from usuarios.models import MetodoPago
 from . import services
 from .models import Puja, Subasta
 
@@ -57,11 +58,23 @@ class PujaTests(TestCase):  # PAIN-22 · PAIN-24 · RF-09 · RF-16 · CU-06
         self.assertEqual(Puja.objects.count(), 1)
 
     def test_solo_compradores_pujan(self):
-        for rol in ("artista", "curador"):
+        for rol in ("curador",):
             self.client.force_login(f.usuario(rol))
             self.assertEqual(self.client.post(reverse("subastas:pujar", args=[self.subasta.pk]), {"monto": "900"}).status_code, 403)
         with self.assertRaises(services.PujaRechazada):
-            services.registrar_puja(self.subasta.pk, f.usuario("artista"), 900)
+            services.registrar_puja(self.subasta.pk, f.usuario("curador"), 900)
+
+    def test_artista_con_metodo_de_pago_puede_pujar(self):
+        otro = f.usuario("artista", con_pago=True)
+        self.client.force_login(otro)
+        self.pujar("550")
+        self.assertEqual(Puja.objects.count(), 1)
+
+    def test_artista_no_puede_pujar_por_su_propia_obra(self):
+        self.client.force_login(self.subasta.obra.artista)
+        MetodoPago.objects.create(usuario=self.subasta.obra.artista, titular="A", ultimos4="4242", vencimiento="12/39")
+        self.assertContains(self.pujar("550"), "propia obra")
+        self.assertFalse(Puja.objects.exists())
 
     def test_pujas_suspendidas_por_moderacion(self):
         Subasta.objects.filter(pk=self.subasta.pk).update(pujas_suspendidas=True)

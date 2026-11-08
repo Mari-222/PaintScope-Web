@@ -35,7 +35,7 @@
   </form>
 </details>
 
-{% if request.user.es_comprador %}
+{% if request.user.puede_pujar %}
 <section class="panel-card" id="pago">
   <h2 class="block-title">Método de pago</h2>
   <p class="muted small" style="margin-top:-.4rem">Necesitas al menos uno registrado para pujar. Solo guardamos los últimos 4 dígitos de tu tarjeta.</p>

@@ -45,11 +45,11 @@
           </form>
         {% endif %}
       </div>
-    {% elif request.user.es_curador or request.user.es_admin or request.user.es_artista %}
+    {% elif request.user.es_curador or request.user.es_admin %}
       <div class="bid-box"><span class="eyebrow">Solo lectura</span><p class="muted small" style="margin:0">Solo los compradores pueden pujar. Tu rol puede seguir la subasta en tiempo real.</p></div>
     {% endif %}
 
-    {% if puede_pujar and not s.cerrada %}
+    {% if request.user.es_comprador and not s.cerrada %}
       <p style="margin-top:1rem"><a class="button button--ghost" href="{% url 'visitas:agendar' obra.pk %}"><svg class="icon" aria-hidden="true" style="width:1rem;height:1rem"><use href="#i-calendar"/></svg> Agendar visita guiada</a></p>
     {% endif %}
 

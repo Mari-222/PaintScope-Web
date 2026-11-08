@@ -67,6 +67,11 @@ class Usuario(AbstractUser):
         return self.rol == self.Rol.COMPRADOR
 
     @property
+    def puede_pujar(self):
+        """add qeu compradores y art puedan pujar"""
+        return self.rol in (self.Rol.COMPRADOR, self.Rol.ARTISTA)
+
+    @property
     def tiene_metodo_pago(self):
         """RF-16: sin método de pago registrado no se puede pujar."""
         return self.metodos_pago.exists()

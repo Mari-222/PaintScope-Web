@@ -81,7 +81,7 @@ def perfil_view(request):
         "form": form,
         "form_password": CambioPasswordForm(usuario),
         "form_pago": MetodoPagoForm(),
-        "metodos": usuario.metodos_pago.all() if usuario.es_comprador else [],
+        "metodos": usuario.metodos_pago.all() if usuario.puede_pujar else [],
         "resumen": _resumen_por_rol(usuario),
     }
     return render(request, "usuarios/perfil.html", contexto)
@@ -100,7 +100,7 @@ def cambiar_password(request):
         "form": PerfilForm(instance=request.user, prefix="perfil"),
         "form_password": form,
         "form_pago": MetodoPagoForm(),
-        "metodos": request.user.metodos_pago.all() if request.user.es_comprador else [],
+        "metodos": request.user.metodos_pago.all() if request.user.puede_pujar else [],
         "resumen": _resumen_por_rol(request.user),
         "abrir_password": True,
     }
@@ -110,8 +110,8 @@ def cambiar_password(request):
 @login_required
 @require_POST
 def agregar_metodo_pago(request):
-    if not request.user.es_comprador:
-        messages.error(request, "Solo los compradores registran método de pago.")
+    if not request.user.puede_pujar:
+        messages.error(request, "Tu rol no registra método de pago.")
         return redirect("perfil")
     form = MetodoPagoForm(request.POST)
     if form.is_valid():

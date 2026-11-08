@@ -76,27 +76,36 @@ def detalle(request, pk):
     if subasta.obra.restringida and not request.user.es_admin:
         messages.info(request, "Esta obra fue retirada del catálogo.")
         return redirect("subastas:explorar")
+    
     usuario = request.user
     motivo_bloqueo = None
+    
     if subasta.cerrada:
         motivo_bloqueo = "La subasta terminó."
     elif subasta.estado == Subasta.Estado.PROGRAMADA:
         motivo_bloqueo = "La subasta aún no abre."
     elif subasta.pujas_suspendidas:
         motivo_bloqueo = "Las pujas están suspendidas por moderación."
-    elif usuario.es_comprador and not usuario.tiene_metodo_pago:
+    elif subasta.obra.artista_id == usuario.pk:
+        motivo_bloqueo = "Es tu obra: no puedes pujar por ella."
+    elif usuario.puede_pujar and not usuario.tiene_metodo_pago:
         motivo_bloqueo = "pago"
+        
     historial = subasta.pujas.select_related("comprador")[:8]
-    mi_puja = subasta.pujas.filter(comprador=usuario).first() if usuario.es_comprador else None
+    mi_puja = subasta.pujas.filter(comprador=usuario).first() if usuario.puede_pujar else None
+    
     return render(request, "subastas/detalle.html", {
-        "s": subasta, "obra": subasta.obra, "historial": historial,
-        "puede_pujar": usuario.es_comprador, "motivo_bloqueo": motivo_bloqueo,
+        "s": subasta,
+        "obra": subasta.obra,
+        "historial": historial,
+        "puede_pujar": usuario.puede_pujar,
+        "motivo_bloqueo": motivo_bloqueo,
         "lidera": bool(mi_puja and subasta.puja_ganadora and subasta.puja_ganadora.comprador_id == usuario.pk),
         "sugerida": subasta.monto_minimo + 49,
     })
 
 
-@rol_requerido("comprador")
+@rol_requerido("comprador", "artista")
 @require_POST
 def pujar(request, pk):
     """CU-06: registra la puja o la rechaza con un mensaje claro."""
@@ -112,7 +121,7 @@ def pujar(request, pk):
     return redirect("subastas:detalle", pk=pk)
 
 
-@rol_requerido("comprador")
+@rol_requerido("comprador", "artista")
 def mis_pujas(request):
     """Prototipo: pestañas Ganando / Superado / Ganadas."""
     services.sincronizar_estados()

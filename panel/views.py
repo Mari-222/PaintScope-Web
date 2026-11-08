@@ -15,13 +15,12 @@ PERMISOS = [
     ("Cargar obras y postularlas a eventos", {"artista": True}),
     ("Evaluar postulaciones y definir precio base", {"curador": True}),
     ("Crear y publicar eventos temáticos", {"curador": True, "admin": True}),
-    ("Pujar en subastas", {"comprador": True}),
+    ("Pujar en subastas", {"comprador": True, "artista": True}),
     ("Agendar visitas guiadas", {"comprador": True}),
-    ("Registrar método de pago", {"comprador": True}),
+    ("Registrar método de pago", {"comprador": True, "artista": True}),
     ("Gestionar usuarios, roles y parámetros", {"admin": True}),
     ("Moderar obras y suspender pujas", {"admin": True}),
 ]
-
 
 @rol_requerido("admin")
 def inicio(request):
